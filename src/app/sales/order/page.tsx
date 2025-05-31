@@ -49,7 +49,14 @@ export default function SalesOrderPage() {
   };
 
   const handleOrder = async () => {
-    if (!selectedCustomer || cart.length === 0) return;
+    if (!selectedCustomer) {
+      toast.error('Vui lòng chọn khách hàng!');
+      return;
+    }
+    if (cart.length === 0) {
+      toast.error('Vui lòng thêm sản phẩm vào giỏ hàng!');
+      return;
+    }
     setIsSubmitting(true);
     try {
       await orderService.createOrder({
@@ -158,7 +165,7 @@ export default function SalesOrderPage() {
               </tbody>
             </table>
             <div className="flex justify-end">
-              <button className="px-6 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors" disabled={isSubmitting || cart.length === 0 || !selectedCustomer} onClick={handleOrder}>Đặt hàng</button>
+              <button className="px-6 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"  onClick={handleOrder}>Đặt hàng</button>
             </div>
           </div>
         )}
