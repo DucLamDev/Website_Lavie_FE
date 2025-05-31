@@ -52,6 +52,8 @@ export interface OrderCreate {
   totalPayment?: number;  // Tổng thanh toán (bao gồm tiền cọc)
   paidAmount?: number;
   created_by?: string;
+  staffId?: string;
+  staffName?: string;
 }
 
 export const orderService = {

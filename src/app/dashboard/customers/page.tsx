@@ -183,15 +183,7 @@ export default function CustomerPage() {
     setSelectedCustomer(null)
   }
 
-  const filteredCustomers = customers
-    .filter(customer =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm)
-    )
-    .filter(customer =>
-      filterType === 'all' ? true : customer.type === filterType
-    )
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const filteredCustomers = customers.filter(c => c.type === 'retail')
 
   return (
     <div className="space-y-6">

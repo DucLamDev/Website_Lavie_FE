@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { FaShoppingCart, FaHome, FaWater, FaPhone, FaInfoCircle, FaBars, FaTimes, FaUser, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa'
+import { FaShoppingCart, FaHome, FaWater, FaPhone, FaInfoCircle, FaBars, FaTimes, FaUser, FaSignOutAlt, FaTachometerAlt, FaHistory, FaMoneyBillWave } from 'react-icons/fa'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Navbar() {
@@ -48,8 +48,19 @@ export default function Navbar() {
       ]
     } else if (user?.role === 'sales') {
       return [
+        { name: 'Dashboard', href: '/sales/dashboard', icon: <FaTachometerAlt /> },
+        { name: 'Đặt hàng tại quầy', href: '/sales/order', icon: <FaShoppingCart /> },
+        { name: 'Đơn hàng trong ngày', href: '/sales/orders', icon: <FaHistory /> },
+        { name: 'Doanh thu', href: '/sales/revenue', icon: <FaMoneyBillWave /> },
+        { name: 'Tồn kho', href: '/sales/inventory', icon: <FaWater /> },
+        { name: 'Khách hàng', href: '/sales/customers', icon: <FaUser /> },
         ...publicItems,
-        { name: 'Đặt hàng', href: '/order', icon: <FaShoppingCart /> },
+      ]
+    } else if (user?.role === 'customer') {
+      return [
+        { name: 'Dashboard', href: '/customer/dashboard', icon: <FaTachometerAlt /> },
+        ...publicItems,
+        { name: 'Đặt hàng', href: '/customer/order', icon: <FaShoppingCart /> },
       ]
     } else {
       return [

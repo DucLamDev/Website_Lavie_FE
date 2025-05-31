@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { FaShoppingCart, FaHistory, FaWater, FaMoneyBillWave, FaUser } from 'react-icons/fa'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
+import { orderService, Order } from '@/services/api/orderService'
 
 interface OrderSummary {
   totalOrders: number
@@ -21,63 +22,39 @@ export default function CustomerDashboard() {
     completedOrders: 0,
     totalSpent: 0
   })
-  const [recentOrders, setRecentOrders] = useState<any[]>([])
+  const [recentOrders, setRecentOrders] = useState<Order[]>([])
 
   useEffect(() => {
-    // Trong một ứng dụng thực tế, bạn sẽ gọi API để lấy dữ liệu
-    // Ở đây, chúng ta sẽ sử dụng dữ liệu giả
     const fetchData = async () => {
       try {
-        // Giả lập gọi API
-        setTimeout(() => {
-          setOrderSummary({
-            totalOrders: 12,
-            pendingOrders: 2,
-            completedOrders: 10,
-            totalSpent: 4500000
-          })
-
-          setRecentOrders([
-            {
-              id: 'ORD-001',
-              date: '2025-05-15',
-              total: 450000,
-              status: 'Đã giao',
-              items: [
-                { name: 'Bình Lavie 20L', quantity: 5 }
-              ]
-            },
-            {
-              id: 'ORD-002',
-              date: '2025-05-10',
-              total: 350000,
-              status: 'Đã giao',
-              items: [
-                { name: 'Bình Lavie 20L', quantity: 4 },
-                { name: 'Vỏ bình', quantity: 1 }
-              ]
-            },
-            {
-              id: 'ORD-003',
-              date: '2025-05-05',
-              total: 600000,
-              status: 'Đang giao',
-              items: [
-                { name: 'Bình Lavie 20L', quantity: 7 }
-              ]
-            }
-          ])
-
-          setIsLoading(false)
-        }, 1000)
+        if (!user) return;
+        // Lấy tất cả đơn hàng của user hiện tại
+        const allOrders = await orderService.getOrders();
+        // Lọc đơn hàng của user hiện tại
+        const customerOrders = allOrders.filter((order) => order.customerId === user.id);
+        // Tính toán thống kê
+        const totalOrders = customerOrders.length;
+        const pendingOrders = customerOrders.filter((o) => o.status === 'pending').length;
+        const completedOrders = customerOrders.filter((o) => o.status === 'completed').length;
+        // Tổng chi tiêu: cộng tất cả paidAmount (nếu có), nếu không thì cộng totalAmount của đơn đã thanh toán hoặc tất cả đơn
+        const totalSpent = customerOrders.reduce((sum, o) => sum + (o.paidAmount || (o.status === 'completed' ? o.totalAmount : 0)), 0);
+        setOrderSummary({
+          totalOrders,
+          pendingOrders,
+          completedOrders,
+          totalSpent
+        });
+        // Lấy 5 đơn hàng gần nhất
+        const sortedOrders = customerOrders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+        setRecentOrders(sortedOrders.slice(0, 5));
       } catch (error) {
-        console.error('Error fetching customer data:', error)
-        setIsLoading(false)
+        console.error('Error fetching customer data:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, [user]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
@@ -186,28 +163,22 @@ export default function CustomerDashboard() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
+                <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary-600">
-                    {order.id}
+                    {order._id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.date).toLocaleDateString('vi-VN')}
+                    {new Date(order.orderDate).toLocaleDateString('vi-VN')}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    <div className="space-y-1">
-                      {order.items.map((item: any, index: number) => (
-                        <div key={index}>
-                          {item.name} x {item.quantity}
-                        </div>
-                      ))}
-                    </div>
+                    -
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(order.total)}
+                    {formatCurrency(order.totalAmount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      order.status === 'Đã giao' 
+                      order.status === 'completed' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
@@ -222,27 +193,20 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Hành động nhanh */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Link 
-          href="/customer/order"
-          className="flex items-center justify-between p-6 bg-primary-600 rounded-lg shadow hover:bg-primary-700 transition-colors"
-        >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <Link href="/customer/order" className="bg-primary-600 hover:bg-primary-700 text-white rounded-lg flex items-center justify-between px-8 py-6 shadow">
           <div>
-            <h3 className="text-lg font-medium text-white">Đặt hàng mới</h3>
-            <p className="text-primary-100">Đặt nước Lavie ngay hôm nay</p>
+            <div className="text-lg font-semibold mb-1">Đặt hàng mới</div>
+            <div className="text-sm">Đặt nước Lavie ngay hôm nay</div>
           </div>
-          <FaShoppingCart className="h-8 w-8 text-white" />
+          <span className="text-3xl ml-4"><i className="fas fa-shopping-cart"></i></span>
         </Link>
-
-        <Link 
-          href="/customer/profile"
-          className="flex items-center justify-between p-6 bg-gray-700 rounded-lg shadow hover:bg-gray-800 transition-colors"
-        >
+        <Link href="/customer/profile" className="bg-gray-800 hover:bg-gray-900 text-white rounded-lg flex items-center justify-between px-8 py-6 shadow">
           <div>
-            <h3 className="text-lg font-medium text-white">Thông tin tài khoản</h3>
-            <p className="text-gray-300">Cập nhật thông tin cá nhân</p>
+            <div className="text-lg font-semibold mb-1">Thông tin tài khoản</div>
+            <div className="text-sm">Cập nhật thông tin cá nhân</div>
           </div>
-          <FaUser className="h-8 w-8 text-white" />
+          <span className="text-3xl ml-4"><i className="fas fa-user"></i></span>
         </Link>
       </div>
     </div>
