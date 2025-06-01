@@ -5,6 +5,7 @@ import { productService } from '@/services/api/productService';
 import { orderService } from '@/services/api/orderService';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
+import { getUsers, User } from '@/services/api/userService';
 
 interface Product { _id: string; name: string; price: number; is_returnable: boolean; stock?: number; }
 interface Customer { _id: string; name: string; phone: string; address: string; }
@@ -23,11 +24,16 @@ export default function SalesOrderPage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [cus, prods] = await Promise.all([
-          customerService.getCustomers(),
-          productService.getProducts()
-        ]);
-        setCustomers(cus);
+        // Lấy user role customer
+        const users: User[] = await getUsers();
+        const customers = users.filter(u => u.role === 'customer');
+        setCustomers(customers.map(u => ({
+          _id: u._id,
+          name: u.name,
+          phone: u.username,
+          address: '',
+        })));
+        const prods = await productService.getProducts();
         setProducts(prods);
       } finally {
         setIsLoading(false);
@@ -95,7 +101,7 @@ export default function SalesOrderPage() {
           setSelectedCustomer(found || null);
         }}>
           <option value="">-- Chọn khách hàng --</option>
-          {customers.map(c => <option key={c._id} value={c._id} className="text-gray-900">{c.name}</option>)}
+          {customers.map(c => <option key={c._id} value={c._id} className="text-gray-900">{c.name} ({c.phone})</option>)}
         </select>
       </div>
       <div className="mb-4">

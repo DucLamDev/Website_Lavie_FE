@@ -86,10 +86,10 @@ export default function Sidebar() {
       roles: ['admin']
     },
     {
-      title: 'Tài khoản',
-      href: '/dashboard/account',
-      icon: <FaUser className="w-5 h-5" />,
-      roles: ['admin', 'sales', 'delivery']
+      title: 'Nhà cung cấp',
+      href: '/dashboard/suppliers',
+      icon: <FaWarehouse className="w-5 h-5" />,
+      roles: ['admin']
     }
   ]
 

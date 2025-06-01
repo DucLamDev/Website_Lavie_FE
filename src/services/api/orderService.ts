@@ -87,8 +87,8 @@ export const orderService = {
     return response.data;
   },
 
-  async updateReturnable(id: string, returnableIn: number): Promise<Order> {
-    const response = await apiClient.put(`/orders/${id}/returnable`, { returnableIn });
+  async updateReturnable(id: string, returnedQuantity: number): Promise<Order> {
+    const response = await apiClient.put(`/orders/${id}/returnable`, { returnedQuantity });
     return response.data;
   },
 

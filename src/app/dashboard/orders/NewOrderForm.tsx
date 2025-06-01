@@ -6,6 +6,7 @@ import { customerService, Customer } from '@/services/api/customerService'
 import { productService, Product } from '@/services/api/productService'
 import { orderService, Order, OrderCreate } from '@/services/api/orderService'
 import { toast } from 'react-toastify'
+import { getUsers, User } from '@/services/api/userService'
 
 type OrderItem = {
   productId: string
@@ -45,10 +46,22 @@ export default function NewOrderForm({ onOrderCreatedAction, onCancelAction }: N
   
   const fetchCustomers = async () => {
     setIsLoadingCustomers(true)
-    
     try {
-      const data = await customerService.getCustomers()
-      setCustomers(data)
+      const users: User[] = await getUsers()
+      const customers = users.filter(u => u.role === 'customer')
+      // Map user -> Customer FE
+      setCustomers(customers.map(u => ({
+        _id: u._id,
+        name: u.name,
+        type: 'retail', // hoặc lấy từ user nếu có
+        phone: u.username, // hoặc lấy trường phone nếu có
+        address: '', // hoặc lấy trường address nếu có
+        agency_level: undefined,
+        debt: 0,
+        empty_debt: 0,
+        createdAt: u.createdAt || '',
+        updatedAt: u.updatedAt || ''
+      })))
     } catch (error: any) {
       console.error('Error fetching customers:', error)
       toast.error(`Lỗi khi tải danh sách khách hàng: ${error.message || 'Unknown error'}`)

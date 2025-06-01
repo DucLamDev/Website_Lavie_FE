@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { orderService } from '@/services/api/orderService';
+import { reportService } from '@/services/api/reportService';
 
 interface Revenue { day: number; week: number; month: number; }
 
@@ -12,8 +12,37 @@ export default function SalesRevenuePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await orderService.getRevenue();
-        setRevenue(data);
+        // Lấy doanh thu hôm nay
+        const today = new Date();
+        const todayStr = today.toISOString().slice(0, 10);
+        const daily = await reportService.getDailyRevenue(todayStr);
+        // Lấy doanh thu tháng
+        const month = today.getMonth() + 1;
+        const year = today.getFullYear();
+        const monthly = await reportService.getMonthlyRevenue(year, month);
+        // Tính doanh thu tuần hiện tại (Thứ 2 - Chủ nhật)
+        const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); // Nếu Chủ nhật thì = 7
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - dayOfWeek + 1); // Đầu tuần (Thứ 2)
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        let weekRevenue = 0;
+        if (monthly.dailyStats) {
+          for (const stat of monthly.dailyStats) {
+            // Đảm bảo stat.date là local date
+            const d = new Date(stat.date + 'T00:00:00');
+            if (d >= weekStart && d <= weekEnd) {
+              weekRevenue += stat.totalRevenue;
+            }
+          }
+        }
+        setRevenue({
+          day: daily.totalRevenue || 0,
+          week: weekRevenue,
+          month: monthly.totalRevenue || 0
+        });
       } finally {
         setIsLoading(false);
       }

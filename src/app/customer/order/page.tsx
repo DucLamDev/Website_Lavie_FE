@@ -11,7 +11,7 @@ export default function CustomerOrderPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
+  const [cart, setCart] = useState<{ product: Product; quantity: number; returnable_quantity?: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,6 +51,14 @@ export default function CustomerOrderPage() {
     );
   };
 
+  const updateReturnableQuantity = (productId: string, value: number) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product._id === productId ? { ...item, returnable_quantity: Math.max(0, value) } : item
+      )
+    );
+  };
+
   const removeFromCart = (productId: string) => {
     setCart((prev) => prev.filter((item) => item.product._id !== productId));
   };
@@ -70,6 +78,7 @@ export default function CustomerOrderPage() {
           quantity: item.quantity,
           unitPrice: item.product.price,
           total: item.product.price * item.quantity,
+          returnable_quantity: item.product.is_returnable ? (item.returnable_quantity || 0) : undefined,
         })),
         paidAmount: 0,
         totalAmount: cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
@@ -99,10 +108,16 @@ export default function CustomerOrderPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {products.map((product) => (
               <div key={product._id} className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
-                <div className="font-medium text-lg mb-2">{product.name}</div>
-                <div className="mb-2">Giá: {product.price?.toLocaleString('vi-VN')} đ</div>
+                <img
+                  src={product.image || '/no-image.png'}
+                  alt={product.name}
+                  className="w-24 h-24 object-contain mb-2 bg-gray-100 rounded"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/no-image.png'; }}
+                />
+                <div className="font-medium text-lg mb-2 text-gray-900 text-center">{product.name}</div>
+                <div className="mb-2 text-gray-700">Giá: {product.price?.toLocaleString('vi-VN')} đ</div>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary text-white font-semibold"
                   onClick={() => addToCart(product)}
                 >
                   Thêm vào giỏ
@@ -118,26 +133,41 @@ export default function CustomerOrderPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr>
-                    <th className="px-4 py-2">Sản phẩm</th>
-                    <th className="px-4 py-2">Số lượng</th>
-                    <th className="px-4 py-2">Thành tiền</th>
+                    <th className="px-4 py-2 text-gray-900">Sản phẩm</th>
+                    <th className="px-4 py-2 text-gray-900">Số lượng</th>
+                    <th className="px-4 py-2 text-gray-900">Thành tiền</th>
+                    <th className="px-4 py-2 text-gray-900">Vỏ trả</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {cart.map((item) => (
                     <tr key={item.product._id}>
-                      <td className="px-4 py-2">{item.product.name}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-2 text-gray-700">{item.product.name}</td>
+                      <td className="px-4 py-2 text-gray-700">
                         <input
                           type="number"
                           min={1}
                           value={item.quantity}
                           onChange={(e) => updateQuantity(item.product._id, Number(e.target.value))}
-                          className="w-16 border rounded px-2 py-1"
+                          className="w-16 border rounded px-2 py-1 text-gray-900"
                         />
                       </td>
-                      <td className="px-4 py-2">{(item.product.price * item.quantity).toLocaleString('vi-VN')} đ</td>
+                      <td className="px-4 py-2 text-gray-700">{(item.product.price * item.quantity).toLocaleString('vi-VN')} đ</td>
+                      <td className="px-4 py-2 text-gray-700">
+                        {item.product.is_returnable ? (
+                          <input
+                            type="number"
+                            min={0}
+                            max={item.quantity}
+                            value={item.returnable_quantity || 0}
+                            onChange={(e) => updateReturnableQuantity(item.product._id, Number(e.target.value))}
+                            className="w-16 border rounded px-2 py-1 text-gray-900"
+                          />
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2">
                         <button className="text-red-600" onClick={() => removeFromCart(item.product._id)}>
                           Xóa

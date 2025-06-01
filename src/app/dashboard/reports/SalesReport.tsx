@@ -218,14 +218,14 @@ export default function SalesReport({ dateRange }: SalesReportProps) {
 
   return (
     <div className="space-y-6">
-      {/* <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4">
         <button
           onClick={handleExportPdf}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Xuất báo cáo PDF
         </button>
-      </div> */}
+      </div>
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>

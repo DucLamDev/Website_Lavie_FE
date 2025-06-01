@@ -4,8 +4,16 @@ import { orderService } from '@/services/api/orderService';
 import { inventoryService } from '@/services/api/inventoryService';
 import { customerService } from '@/services/api/customerService';
 import type { Order } from '@/services/api/orderService';
-import type { Inventory } from '@/services/api/inventoryService';
 import type { Customer } from '@/services/api/customerService';
+import { reportService } from '@/services/api/reportService';
+import { getUsers, User } from '@/services/api/userService';
+
+// Định nghĩa type cho item tồn kho lấy từ reportService
+interface InventoryItem {
+  productId: string;
+  productName: string;
+  inStock: number;
+}
 
 export default function SalesDashboardPage() {
   const [stats, setStats] = useState<{
@@ -25,25 +33,36 @@ export default function SalesDashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [allOrders, inventorySummary, customers]: [Order[], any[], Customer[]] = await Promise.all([
-          orderService.getOrders(),
-          inventoryService.getInventorySummary(),
-          customerService.getCustomers()
-        ]);
-        // Đơn trong ngày
+        // Đơn và doanh thu hôm nay
         const today = new Date();
-        const isToday = (dateStr: string) => {
-          const d = new Date(dateStr);
-          return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-        };
-        const orders = allOrders.filter(order => isToday(order.orderDate));
-        const revenueToday = orders.reduce((sum, o) => sum + (o.paidAmount || 0), 0);
-        // Tổng tồn kho
-        const inventory = inventorySummary.reduce((sum, item) => sum + (item.inStock || 0), 0);
+        const todayStr = today.toISOString().slice(0, 10);
+        const daily = await reportService.getDailyRevenue(todayStr);
+        // Tồn kho
+        const inventoryData = await reportService.getInventoryReport();
+        const allProducts = [
+          ...(inventoryData.lowStockProducts || []),
+          ...(inventoryData.outOfStockProducts || []),
+          ...(inventoryData.mostStockedProducts || [])
+        ];
+        // Loại trùng productId
+        const unique = Object.values(
+          allProducts.reduce((acc: Record<string, InventoryItem>, item: any) => {
+            acc[item.productId] = {
+              productId: item.productId,
+              productName: item.productName,
+              inStock: item.inStock
+            };
+            return acc;
+          }, {})
+        ) as InventoryItem[];
+        const totalInventory = unique.reduce((sum, item) => sum + (item.inStock || 0), 0);
+        // Khách hàng
+        const users: User[] = await getUsers();
+        const customers = users.filter(u => u.role === 'customer');
         setStats({
-          ordersToday: orders.length,
-          revenueToday,
-          inventory,
+          ordersToday: daily.totalOrders || 0,
+          revenueToday: daily.totalRevenue || 0,
+          inventory: totalInventory,
           customers: customers.length,
           isLoading: false
         });
@@ -68,10 +87,10 @@ export default function SalesDashboardPage() {
           <div className="text-sm text-gray-500">Doanh thu trong ngày</div>
           <div className="text-2xl font-bold text-green-600">{stats.revenueToday.toLocaleString('vi-VN')} đ</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-5">
+        {/* <div className="bg-white rounded-lg shadow p-5">
           <div className="text-sm text-gray-500">Tồn kho</div>
           <div className="text-2xl font-bold text-blue-600">{stats.inventory}</div>
-        </div>
+        </div> */}
         <div className="bg-white rounded-lg shadow p-5">
           <div className="text-sm text-gray-500">Khách hàng</div>
           <div className="text-2xl font-bold text-purple-600">{stats.customers}</div>

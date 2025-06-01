@@ -45,11 +45,9 @@ export default function OrderDetail({ order, onUpdateStatusAction, onUpdatePayme
   
   const handleUpdatePayment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
     try {
-      const newPaidAmount = order.paidAmount + paymentAmount
-      await orderService.updatePayment(order._id, newPaidAmount)
-      onUpdatePaymentAction(order._id, newPaidAmount)
+      await orderService.updatePayment(order._id, paymentAmount)
+      onUpdatePaymentAction(order._id, paymentAmount)
       setShowPaymentModal(false)
       toast.success('Cập nhật thanh toán thành công')
     } catch (error: any) {
@@ -273,21 +271,21 @@ export default function OrderDetail({ order, onUpdateStatusAction, onUpdatePayme
             <form onSubmit={handleUpdatePayment}>
               <div className="space-y-4">
                 <div>
-                  <label className="label">Số tiền đã thanh toán</label>
-                  <div className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  <label className="label text-gray-900">Số tiền đã thanh toán</label>
+                  <div className="text-lg font-medium text-gray-900 mb-2">
                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.paidAmount)}
                   </div>
                 </div>
                 
                 <div>
-                  <label className="label">Số tiền còn nợ</label>
+                  <label className="label text-gray-900">Số tiền còn nợ</label>
                   <div className="text-lg font-medium text-red-500 mb-2">
                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.debtRemaining)}
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="payment" className="label">Số tiền thanh toán thêm</label>
+                  <label htmlFor="payment" className="label text-gray-900">Số tiền thanh toán thêm</label>
                   <input
                     type="number"
                     id="payment"
@@ -331,21 +329,17 @@ export default function OrderDetail({ order, onUpdateStatusAction, onUpdatePayme
             <form onSubmit={handleUpdateReturnable}>
               <div className="space-y-4">
                 <div>
-                  <label className="label">Vỏ đã xuất</label>
-                  <div className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {order.returnableOut}
-                  </div>
+                  <label className="label text-gray-900">Vỏ đã xuất</label>
+                  <div className="text-lg font-medium text-gray-900 mb-2">{order.returnableOut}</div>
                 </div>
                 
                 <div>
-                  <label className="label">Vỏ đã trả</label>
-                  <div className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {order.returnableIn}
-                  </div>
+                  <label className="label text-gray-900">Vỏ đã trả</label>
+                  <div className="text-lg font-medium text-gray-900 mb-2">{order.returnableIn}</div>
                 </div>
                 
                 <div>
-                  <label htmlFor="returnable" className="label">Số vỏ trả thêm</label>
+                  <label htmlFor="returnable" className="label text-gray-900">Số vỏ trả thêm</label>
                   <input
                     type="number"
                     id="returnable"

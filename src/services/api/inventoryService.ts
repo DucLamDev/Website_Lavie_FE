@@ -147,5 +147,10 @@ export const inventoryService = {
   async exportInventoryReportByDate(startDate: string, endDate: string): Promise<string> {
     const token = localStorage.getItem('userToken')
     return `${process.env.NEXT_PUBLIC_API_URL}/inventory/report/date/export?startDate=${startDate}&endDate=${endDate}&token=${token}`
+  },
+
+  async exportInventoryReport(): Promise<string> {
+    const token = localStorage.getItem('userToken')
+    return `${process.env.NEXT_PUBLIC_API_URL}/reports/inventory/export?token=${token}`
   }
 }

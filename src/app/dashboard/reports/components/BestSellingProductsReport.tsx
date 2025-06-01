@@ -61,9 +61,17 @@ export default function BestSellingProductsReport({ dateRange }: BestSellingProd
     setLimit(parseInt(e.target.value))
   }
   
-  const downloadInventoryReport = () => {
-    const url = reportService.generateInventoryReportPdf()
-    window.open(url, '_blank')
+  const handleExportPdf = async () => {
+    try {
+      const url = await reportService.generateBestSellingProductsReportPdf({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        limit
+      })
+      window.open(url, '_blank')
+    } catch (error) {
+      // Xử lý lỗi nếu cần
+    }
   }
   
   // Chart data for quantity sold
@@ -110,7 +118,7 @@ export default function BestSellingProductsReport({ dateRange }: BestSellingProd
             </select>
           </div>
           <button
-            onClick={downloadInventoryReport}
+            onClick={handleExportPdf}
             className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
           >
             <FaFileDownload className="mr-2" />

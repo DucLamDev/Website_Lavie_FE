@@ -58,54 +58,30 @@ export default function FinancialReport({ dateRange }: FinancialReportProps) {
   const fetchReport = async () => {
     setIsLoading(true)
     try {
-      // Thử gọi API thực, nếu API chưa có thì sử dụng mock data
-      try {
-        const data = await reportService.getFinancialReport({
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate
-        })
-        setReport(data)
-      } catch (apiError) {
-        console.warn('API chưa sẵn sàng, sử dụng mock data:', apiError)
-        
-        // Mock data khi API chưa sẵn sàng
-        const mockDailyData = Array.from({ length: 30 }, (_, i) => {
-          const date = new Date()
-          date.setDate(date.getDate() - i)
-          return {
-            date: date.toISOString(),
-            revenue: Math.floor(Math.random() * 8000000) + 4000000, // Random từ 4-12 triệu
-            expenses: Math.floor(Math.random() * 4000000) + 3000000, // Random từ 3-7 triệu
-            profit: Math.floor(Math.random() * 4000000) + 1000000 // Random từ 1-5 triệu
-          }
-        }).reverse()
-        
-        const mockData: FinancialReportType = {
-          totalRevenue: 450000000, // 450 triệu
-          totalExpenses: 280000000, // 280 triệu
-          netProfit: 170000000,    // 170 triệu
-          dailyFinancials: mockDailyData,
-          revenueByCategory: [
-            { category: 'Bán hàng', amount: 400000000, percentage: 88.9 },
-            { category: 'Vỏ bình hoàn trả', amount: 35000000, percentage: 7.8 },
-            { category: 'Dịch vụ khác', amount: 15000000, percentage: 3.3 }
-          ],
-          expensesByCategory: [
-            { category: 'Mua hàng', amount: 180000000, percentage: 64.3 },
-            { category: 'Lương nhân viên', amount: 60000000, percentage: 21.4 },
-            { category: 'Chi phí vận chuyển', amount: 22000000, percentage: 7.9 },
-            { category: 'Tiện ích', amount: 10000000, percentage: 3.6 },
-            { category: 'Chi phí khác', amount: 8000000, percentage: 2.8 }
-          ]
-        }
-        
-        setReport(mockData)
-      }
+      const data = await reportService.getFinancialReport({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate
+      })
+      setReport(data)
     } catch (error: any) {
       console.error('Error fetching financial report:', error)
       toast.error(`Lỗi khi tải báo cáo tài chính: ${error.message || 'Unknown error'}`)
     } finally {
       setIsLoading(false)
+    }
+  }
+  
+  const handleExportPdf = async () => {
+    try {
+      toast.info('Đang chuẩn bị xuất báo cáo PDF...')
+      const url = await reportService.generateFinancialReportPdf({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate
+      })
+      window.open(url, '_blank')
+      toast.success('Xuất báo cáo PDF thành công!')
+    } catch (error) {
+      toast.error('Không thể xuất báo cáo PDF. Vui lòng thử lại sau.')
     }
   }
   
@@ -269,7 +245,15 @@ export default function FinancialReport({ dateRange }: FinancialReportProps) {
   }
   
   return (
-    <div>
+    <div className="space-y-6">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleExportPdf}
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          Xuất báo cáo PDF
+        </button>
+      </div>
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>

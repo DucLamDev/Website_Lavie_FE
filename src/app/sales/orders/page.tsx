@@ -45,10 +45,10 @@ export default function SalesOrdersPage() {
         <tbody className="bg-white divide-y divide-gray-200">
           {orders.map(order => (
             <tr key={order._id}>
-              <td className="px-6 py-4 whitespace-nowrap text-primary-600">{order._id}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{order.customerName}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{order.totalAmount.toLocaleString('vi-VN')} đ</td>
-              <td className="px-6 py-4 whitespace-nowrap">{order.status}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order._id}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.customerName}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.totalAmount.toLocaleString('vi-VN')} đ</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.status}</td>
             </tr>
           ))}
         </tbody>

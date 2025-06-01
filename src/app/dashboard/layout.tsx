@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     // Check if user is authenticated and has admin role
@@ -25,16 +26,12 @@ export default function DashboardLayout({
     
     try {
       const user = JSON.parse(userData)
-      if (user.role !== 'admin') {
-        // Redirect non-admin users to appropriate pages
-        if (user.role === 'sales') {
-          router.push('/order')
-        } else {
-          router.push('/') // Default redirect for other roles
-        }
+      setUserRole(user.role)
+      if (user.role !== 'admin' && user.role !== 'sales') {
+        // Redirect non-admin/sales users to appropriate pages
+        router.push('/') // Default redirect for other roles
         return
       }
-      
       setIsLoading(false)
     } catch (error) {
       console.error('Error parsing user data:', error)
@@ -54,7 +51,7 @@ export default function DashboardLayout({
     <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
       <Sidebar />
       <div className="flex flex-col flex-1 ml-64">
-        <Header />
+        {userRole !== 'sales' && <Header />}
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

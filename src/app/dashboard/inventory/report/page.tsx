@@ -67,19 +67,9 @@ export default function InventoryReportPage() {
   }
 
   const handleExportPDF = async () => {
-    if (!startDate || !endDate) {
-      toast.error('Vui lòng chọn ngày bắt đầu và ngày kết thúc')
-      return
-    }
-
     setIsExporting(true)
     try {
-      const pdfUrl = await inventoryService.exportInventoryReportByDate(
-        startDate.toISOString().split('T')[0],
-        endDate.toISOString().split('T')[0]
-      )
-      
-      // Open PDF in new tab
+      const pdfUrl = await inventoryService.exportInventoryReport()
       window.open(pdfUrl, '_blank')
     } catch (error) {
       toast.error('Không thể xuất báo cáo PDF')

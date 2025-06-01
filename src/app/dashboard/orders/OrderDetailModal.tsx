@@ -376,25 +376,25 @@ export default function OrderDetailModal({ orderId, isOpen, onCloseAction, onOrd
                     <form onSubmit={handleUpdatePayment}>
                       <div className="mt-4 space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Tổng tiền</label>
-                          <div className="mt-1 text-lg font-medium">
+                          <label className="block text-sm font-medium text-gray-900">Tổng tiền</label>
+                          <div className="mt-1 text-lg font-medium text-gray-900">
                             {formatCurrency(order?.totalAmount || 0)}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Đã thanh toán</label>
-                          <div className="mt-1 text-lg font-medium">
+                          <label className="block text-sm font-medium text-gray-900">Đã thanh toán</label>
+                          <div className="mt-1 text-lg font-medium text-gray-900">
                             {formatCurrency(order?.paidAmount || 0)}
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Còn nợ</label>
+                          <label className="block text-sm font-medium text-gray-900">Còn nợ</label>
                           <div className="mt-1 text-lg font-medium text-red-600">
                             {formatCurrency((order?.totalAmount || 0) - (order?.paidAmount || 0))}
                           </div>
                         </div>
                         <div>
-                          <label htmlFor="payment" className="block text-sm font-medium text-gray-700">
+                          <label htmlFor="payment" className="block text-sm font-medium text-gray-900">
                             Số tiền thanh toán thêm
                           </label>
                           <input
@@ -436,19 +436,15 @@ export default function OrderDetailModal({ orderId, isOpen, onCloseAction, onOrd
                     <form onSubmit={handleUpdateReturnable}>
                       <div className="mt-4 space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Vỏ đã xuất</label>
-                          <div className="mt-1 text-lg font-medium">
-                            {order?.returnableOut || 0}
-                          </div>
+                          <label className="block text-sm font-medium text-gray-900">Vỏ đã xuất</label>
+                          <div className="mt-1 text-lg font-medium text-gray-900">{order?.returnableOut || 0}</div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Vỏ đã trả</label>
-                          <div className="mt-1 text-lg font-medium">
-                            {order?.returnableIn || 0}
-                          </div>
+                          <label className="block text-sm font-medium text-gray-900">Vỏ đã trả</label>
+                          <div className="mt-1 text-lg font-medium text-gray-900">{order?.returnableIn || 0}</div>
                         </div>
                         <div>
-                          <label htmlFor="returnable" className="block text-sm font-medium text-gray-700">
+                          <label htmlFor="returnable" className="block text-sm font-medium text-gray-900">
                             Số vỏ trả thêm
                           </label>
                           <input

@@ -52,9 +52,9 @@ export default function Navbar() {
         { name: 'Đặt hàng tại quầy', href: '/sales/order', icon: <FaShoppingCart /> },
         { name: 'Đơn hàng trong ngày', href: '/sales/orders', icon: <FaHistory /> },
         { name: 'Doanh thu', href: '/sales/revenue', icon: <FaMoneyBillWave /> },
-        { name: 'Tồn kho', href: '/sales/inventory', icon: <FaWater /> },
-        { name: 'Khách hàng', href: '/sales/customers', icon: <FaUser /> },
-        ...publicItems,
+        // { name: 'Tồn kho', href: '/sales/inventory', icon: <FaWater /> },
+        { name: 'Khách hàng', href: '/sales/customers', icon: <FaUser /> }
+        // ...publicItems,
       ]
     } else if (user?.role === 'customer') {
       return [

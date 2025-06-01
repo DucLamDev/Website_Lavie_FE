@@ -125,6 +125,14 @@ export default function SupplierDebtReport({ dateRange }: SupplierDebtReportProp
   
   return (
     <div className="space-y-6">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleExportPdf}
+          className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Xuất báo cáo PDF
+        </button>
+      </div>
       {isLoading ? (
         <div className="flex justify-center p-12">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary-400 border-t-transparent"></div>
@@ -133,7 +141,7 @@ export default function SupplierDebtReport({ dateRange }: SupplierDebtReportProp
         <>
           {/* Summary Cards */}
           {/* Export PDF Button */}
-          <div className="flex justify-end mb-4">
+          {/* <div className="flex justify-end mb-4">
             <button
               onClick={handleExportPdf}
               className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -154,7 +162,7 @@ export default function SupplierDebtReport({ dateRange }: SupplierDebtReportProp
               </svg>
               Xuất PDF
             </button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg shadow border border-gray-200">

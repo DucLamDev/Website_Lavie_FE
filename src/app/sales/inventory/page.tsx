@@ -1,18 +1,42 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { inventoryService } from '@/services/api/inventoryService';
+import { reportService } from '@/services/api/reportService';
 import type { InventorySummary } from '@/services/api/inventoryService';
 
+// Định nghĩa type cho item tồn kho lấy từ reportService
+interface InventoryItem {
+  productId: string;
+  productName: string;
+  inStock: number;
+}
+
 export default function SalesInventoryPage() {
-  const [inventory, setInventory] = useState<InventorySummary[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await inventoryService.getInventorySummary();
-        setInventory(data);
+        const data = await reportService.getInventoryReport();
+        // Gộp các sản phẩm tồn kho (lowStock, outOfStock, mostStocked) thành 1 mảng
+        const allProducts = [
+          ...(data.lowStockProducts || []),
+          ...(data.outOfStockProducts || []),
+          ...(data.mostStockedProducts || [])
+        ];
+        // Loại trùng productId
+        const unique = Object.values(
+          allProducts.reduce((acc: Record<string, InventoryItem>, item: any) => {
+            acc[item.productId] = {
+              productId: item.productId,
+              productName: item.productName,
+              inStock: item.inStock
+            };
+            return acc;
+          }, {})
+        ) as InventoryItem[];
+        setInventory(unique);
       } finally {
         setIsLoading(false);
       }
@@ -35,8 +59,8 @@ export default function SalesInventoryPage() {
         <tbody className="bg-white divide-y divide-gray-200">
           {inventory.map(item => (
             <tr key={item.productId}>
-              <td className="px-6 py-4 whitespace-nowrap">{item.product?.name || item.productId}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{item.inStock}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{item.productName || item.productId}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900">{item.inStock}</td>
             </tr>
           ))}
         </tbody>

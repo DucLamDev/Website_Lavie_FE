@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import { getUsers, User } from '@/services/api/userService'
+import orderService, { Order } from '@/services/api/orderService'
 
 type Customer = {
   _id: string
@@ -40,58 +42,35 @@ export default function CustomerPage() {
 
   const fetchCustomers = async () => {
     setIsLoading(true)
-
-    // In a real app, this would be an API call
-    // For now, use mock data
-    setTimeout(() => {
-      const mockCustomers: Customer[] = [
-        {
-          _id: '1',
-          name: 'Nguyễn Văn A',
+    try {
+      const users: User[] = await getUsers()
+      const customers = users.filter(u => u.role === 'customer')
+      // Lấy tất cả orders
+      const orders: Order[] = await orderService.getOrders()
+      // Map user -> customer FE, tính debt và empty_debt
+      const customerList: Customer[] = customers.map(u => {
+        const userOrders = orders.filter((o: Order) => o.customerId === u._id || (typeof o.customerId === 'object' && (o.customerId as any)._id === u._id))
+        // Tổng công nợ = tổng debtRemaining các đơn chưa thanh toán
+        const debt = userOrders.reduce((sum: number, o: Order) => sum + (o.debtRemaining || 0), 0)
+        // Tổng vỏ nợ = tổng (returnableOut - returnableIn) các đơn chưa trả hết vỏ
+        const empty_debt = userOrders.reduce((sum: number, o: Order) => sum + ((o.returnableOut || 0) - (o.returnableIn || 0)), 0)
+        return {
+          _id: u._id,
+          name: u.name,
           type: 'retail',
-          phone: '0901234567',
-          address: 'Quận 1, TP HCM',
-          debt: 0,
-          empty_debt: 0,
-          createdAt: '2025-05-01T10:30:00Z'
-        },
-        {
-          _id: '2',
-          name: 'Đại lý Quận 10',
-          type: 'agency',
-          phone: '0978123456',
-          address: 'Quận 10, TP HCM',
-          agency_level: 2,
-          debt: 1200000,
-          empty_debt: 2,
-          createdAt: '2025-04-15T14:20:00Z'
-        },
-        {
-          _id: '3',
-          name: 'Trần Thị B',
-          type: 'retail',
-          phone: '0912345678',
-          address: 'Quận 3, TP HCM',
-          debt: 150000,
-          empty_debt: 1,
-          createdAt: '2025-05-05T09:15:00Z'
-        },
-        {
-          _id: '4',
-          name: 'Đại lý Tân Bình',
-          type: 'agency',
-          phone: '0918765432',
-          address: 'Quận Tân Bình, TP HCM',
-          agency_level: 2,
-          debt: 850000,
-          empty_debt: 5,
-          createdAt: '2025-04-20T11:30:00Z'
-        },
-      ]
-
-      setCustomers(mockCustomers)
-      setIsLoading(false)
-    }, 1000)
+          phone: '',
+          address: '',
+          agency_level: undefined,
+          debt,
+          empty_debt,
+          createdAt: u.createdAt || '',
+        }
+      })
+      setCustomers(customerList)
+    } catch (err) {
+      toast.error('Không thể tải danh sách khách hàng')
+    }
+    setIsLoading(false)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -183,7 +162,18 @@ export default function CustomerPage() {
     setSelectedCustomer(null)
   }
 
-  const filteredCustomers = customers.filter(c => c.type === 'retail')
+  // Lọc và tìm kiếm khách hàng
+  const filteredCustomers = customers.filter((c) => {
+    // Lọc theo loại
+    if (filterType !== 'all' && c.type !== filterType) return false;
+    // Tìm kiếm theo tên hoặc số điện thoại
+    const search = searchTerm.trim().toLowerCase();
+    if (!search) return true;
+    return (
+      c.name.toLowerCase().includes(search) ||
+      (c.phone && c.phone.toLowerCase().includes(search))
+    );
+  });
 
   return (
     <div className="space-y-6">
