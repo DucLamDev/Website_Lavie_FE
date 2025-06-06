@@ -22,7 +22,8 @@ export default function UserForm({ user, onSave }: UserFormProps) {
     username: '',
     password: '',
     name: '',
-    role: 'sales',
+    role: 'customer',
+    agency_level: 1,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ export default function UserForm({ user, onSave }: UserFormProps) {
         username: user.username,
         name: user.name,
         role: user.role,
+        agency_level: user.agency_level || 1,
         // Don't include password in edit mode initially
       });
       
@@ -69,12 +71,12 @@ export default function UserForm({ user, onSave }: UserFormProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name) {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: name === 'agency_level' ? Number(value) : value,
       }));
     }
   };
@@ -240,6 +242,25 @@ export default function UserForm({ user, onSave }: UserFormProps) {
             <p className="mt-1 text-sm text-red-600">{errors.role}</p>
           )}
         </div>
+        {formData.role === 'customer' && (
+          <div>
+            <label htmlFor="agency_level" className="block text-sm font-medium text-gray-700">
+              Cấp khách hàng
+            </label>
+            <select
+              id="agency_level"
+              name="agency_level"
+              value={formData.agency_level}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              disabled={loading}
+            >
+              <option value={1}>Khách lẻ</option>
+              <option value={2}>Đại lý cấp 2</option>
+              <option value={3}>Đại lý cấp 3</option>
+            </select>
+          </div>
+        )}
       </div>
       
       <div className="mt-6 flex justify-end">

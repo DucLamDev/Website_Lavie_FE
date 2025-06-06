@@ -6,6 +6,9 @@ export interface User {
   username: string;
   name: string;
   role: 'admin' | 'sales' | 'customer';
+  agency_level?: number;
+  phone?: string;
+  address?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -15,6 +18,9 @@ export interface CreateUserRequest {
   password: string;
   name: string;
   role: 'admin' | 'sales' | 'customer';
+  agency_level?: number;
+  phone?: string;
+  address?: string;
 }
 
 export interface UpdateUserRequest {
@@ -22,6 +28,9 @@ export interface UpdateUserRequest {
   password?: string;
   name?: string;
   role?: 'admin' | 'sales' | 'customer';
+  agency_level?: number;
+  phone?: string;
+  address?: string;
 }
 
 // Get all users

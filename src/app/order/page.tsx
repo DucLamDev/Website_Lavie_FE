@@ -18,6 +18,7 @@ type Product = {
   is_returnable: boolean
   description?: string
   image_url?: string
+  stock?: number
 }
 
 type CartItem = {
@@ -241,40 +242,21 @@ function OrderContent() {
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
                 {products.map(product => (
-                  <div key={product._id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="aspect-w-16 aspect-h-9 bg-gray-100 relative">
-                      {product.image_url ? (
-                        <Image 
-                          src={product.image_url} 
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <span className="text-gray-400">Không có hình ảnh</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                      <p className="text-gray-500 text-sm mb-2">{product.unit}</p>
-                      {product.description && (
-                        <p className="text-gray-600 text-sm mb-3">{product.description}</p>
-                      )}
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary-600">{formatCurrency(product.price)}</span>
-                        <button
-                          onClick={() => handleAddToCart(product)}
-                          className="bg-primary-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 hover:bg-primary-700 transition-colors"
-                        >
-                          <FaPlus size={12} />
-                          <span>Thêm</span>
-                        </button>
-                      </div>
-                    </div>
+                  <div key={product._id} className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+                    {product.image_url && (
+                      <img src={product.image_url} alt={product.name} className="h-24 object-contain mb-4" />
+                    )}
+                    <div className="font-semibold text-lg text-center mb-2">{product.name}</div>
+                    <div className="text-gray-600 text-center mb-2">Giá: {formatCurrency(product.price)}</div>
+                    <div className="text-gray-500 text-center mb-2">Số lượng còn lại: {product.stock !== undefined ? product.stock : 'Không rõ'}</div>
+                    <button
+                      className="btn btn-primary w-full mt-2"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Thêm vào giỏ
+                    </button>
                   </div>
                 ))}
               </div>
